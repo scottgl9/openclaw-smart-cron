@@ -35,6 +35,10 @@
                 }
               }
             },
+            "mode": {
+              "type": "string",
+              "enum": ["gate", "task"]
+            },
             "file": {
               "type": "string",
               "minLength": 1

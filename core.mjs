@@ -23,6 +23,10 @@ function normalizeOutput(value) {
   return typeof value === 'string' ? value : '';
 }
 
+function resolveRuleMode(rule) {
+  return rule.mode === 'task' ? 'task' : 'gate';
+}
+
 function matchesRule(rule, ctx) {
   const match = rule.match;
   if (!match) return true;
@@ -83,8 +87,9 @@ export function createBeforeAgentReplyHandler(api) {
     const rule = rules.find((candidate) => matchesRule(candidate, ctx));
     if (!rule) return;
 
+    const mode = resolveRuleMode(rule);
     const outcome = await runRule(rule);
-    const prefix = `smart-scheduler: ${ctx.trigger}${ctx.agentId ? ` agent=${ctx.agentId}` : ''}`;
+    const prefix = `smart-scheduler: ${ctx.trigger}${ctx.agentId ? ` agent=${ctx.agentId}` : ''} mode=${mode}`;
 
     if (rule.logOutput && (outcome.stdout || outcome.stderr)) {
       api.logger.info(
@@ -92,8 +97,40 @@ export function createBeforeAgentReplyHandler(api) {
       );
     }
 
+    if (mode === 'task') {
+      if (outcome.kind === 'continue') {
+        api.logger.info(`${prefix} task completed (exit=${outcome.exitCode ?? '0'})`);
+        return {
+          handled: true,
+          reason: 'smart-scheduler-task-complete',
+        };
+      }
+
+      if (outcome.kind === 'skip') {
+        api.logger.info(`${prefix} task skipped (exit=${outcome.exitCode ?? 'unknown'})`);
+        return {
+          handled: true,
+          reason: 'smart-scheduler-task-skip',
+        };
+      }
+
+      if (rule.failOpen) {
+        api.logger.warn(`${prefix} task error but failOpen=true; swallowing scheduled turn. ${String(outcome.error)}`);
+        return {
+          handled: true,
+          reason: 'smart-scheduler-task-error-ignored',
+        };
+      }
+
+      api.logger.error(`${prefix} task failed; swallowing scheduled turn. ${String(outcome.error)}`);
+      return {
+        handled: true,
+        reason: 'smart-scheduler-task-error',
+      };
+    }
+
     if (outcome.kind === 'continue') {
-      api.logger.info(`${prefix} continuing (exit=${outcome.exitCode ?? '0'})`);
+      api.logger.info(`${prefix} continuing to agent (exit=${outcome.exitCode ?? '0'})`);
       return;
     }
 
@@ -106,11 +143,11 @@ export function createBeforeAgentReplyHandler(api) {
     }
 
     if (rule.failOpen) {
-      api.logger.warn(`${prefix} prehook error but failOpen=true; continuing. ${String(outcome.error)}`);
+      api.logger.warn(`${prefix} gate error but failOpen=true; continuing. ${String(outcome.error)}`);
       return;
     }
 
-    api.logger.error(`${prefix} prehook failed; swallowing run. ${String(outcome.error)}`);
+    api.logger.error(`${prefix} gate failed; swallowing run. ${String(outcome.error)}`);
     return {
       handled: true,
       reason: 'smart-scheduler-error',

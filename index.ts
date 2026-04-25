@@ -24,6 +24,7 @@ type MatchRule = {
 };
 
 type Rule = {
+  mode?: "gate" | "task";
   match?: MatchRule;
   file: string;
   args?: string[];
@@ -58,6 +59,10 @@ function truncateForLog(value: string): string {
 
 function normalizeOutput(value: unknown): string {
   return typeof value === "string" ? value : "";
+}
+
+function resolveRuleMode(rule: Rule): "gate" | "task" {
+  return rule.mode === "task" ? "task" : "gate";
 }
 
 function matchesRule(rule: Rule, ctx: PluginHookAgentContext & { reason?: string }): boolean {
@@ -123,8 +128,9 @@ function createBeforeAgentReplyHandler(api: OpenClawPluginApi) {
     const rule = rules.find((candidate) => matchesRule(candidate, ctx));
     if (!rule) return;
 
+    const mode = resolveRuleMode(rule);
     const outcome = await runRule(rule);
-    const prefix = `prehook-gate: ${ctx.trigger}${ctx.agentId ? ` agent=${ctx.agentId}` : ""}`;
+    const prefix = `smart-scheduler: ${ctx.trigger}${ctx.agentId ? ` agent=${ctx.agentId}` : ""} mode=${mode}`;
 
     if (rule.logOutput && (outcome.stdout || outcome.stderr)) {
       api.logger.info(
@@ -132,8 +138,40 @@ function createBeforeAgentReplyHandler(api: OpenClawPluginApi) {
       );
     }
 
+    if (mode === "task") {
+      if (outcome.kind === "continue") {
+        api.logger.info(`${prefix} task completed (exit=${outcome.exitCode ?? "0"})`);
+        return {
+          handled: true,
+          reason: "smart-scheduler-task-complete",
+        };
+      }
+
+      if (outcome.kind === "skip") {
+        api.logger.info(`${prefix} task skipped (exit=${outcome.exitCode ?? "unknown"})`);
+        return {
+          handled: true,
+          reason: "smart-scheduler-task-skip",
+        };
+      }
+
+      if (rule.failOpen) {
+        api.logger.warn(`${prefix} task error but failOpen=true; swallowing scheduled turn. ${String(outcome.error)}`);
+        return {
+          handled: true,
+          reason: "smart-scheduler-task-error-ignored",
+        };
+      }
+
+      api.logger.error(`${prefix} task failed; swallowing scheduled turn. ${String(outcome.error)}`);
+      return {
+        handled: true,
+        reason: "smart-scheduler-task-error",
+      };
+    }
+
     if (outcome.kind === "continue") {
-      api.logger.info(`${prefix} continuing (exit=${outcome.exitCode ?? "0"})`);
+      api.logger.info(`${prefix} continuing to agent (exit=${outcome.exitCode ?? "0"})`);
       return;
     }
 
@@ -146,11 +184,11 @@ function createBeforeAgentReplyHandler(api: OpenClawPluginApi) {
     }
 
     if (rule.failOpen) {
-      api.logger.warn(`${prefix} prehook error but failOpen=true; continuing. ${String(outcome.error)}`);
+      api.logger.warn(`${prefix} gate error but failOpen=true; continuing. ${String(outcome.error)}`);
       return;
     }
 
-    api.logger.error(`${prefix} prehook failed; swallowing run. ${String(outcome.error)}`);
+    api.logger.error(`${prefix} gate failed; swallowing run. ${String(outcome.error)}`);
     return {
       handled: true,
       reason: "smart-scheduler-error",
@@ -161,8 +199,8 @@ function createBeforeAgentReplyHandler(api: OpenClawPluginApi) {
 export { createBeforeAgentReplyHandler };
 
 export default definePluginEntry({
-  id: "prehook-gate",
-  name: "PreHook Gate",
+  id: "smart-scheduler",
+  name: "Smart Scheduler",
   description: "Run agents only when conditions are met, or execute scheduled tasks without waking an agent.",
   register(api) {
     api.on("before_agent_reply", createBeforeAgentReplyHandler(api));
