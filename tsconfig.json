@@ -7,12 +7,7 @@
     "noEmit": true,
     "allowJs": false,
     "skipLibCheck": true,
-    "types": ["node"],
-    "baseUrl": ".",
-    "paths": {
-      "openclaw/plugin-sdk/plugin-entry": ["../openclaw/dist/plugin-sdk/plugin-entry.d.ts"],
-      "openclaw/plugin-sdk/src/plugins/hooks": ["../openclaw/dist/plugin-sdk/src/plugins/hooks.d.ts"]
-    }
+    "types": ["node"]
   },
-  "include": ["index.ts"]
+  "include": ["index.ts", "src/**/*.ts", "test/**/*.ts", "types/**/*.d.ts"]
 }

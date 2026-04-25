@@ -1,1 +1,25 @@
+# Dependencies
 node_modules/
+
+# Build output (Phase 4 will introduce dist/ for publish)
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor scratch
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Test/runtime scratch
+.tmp/
+coverage/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
