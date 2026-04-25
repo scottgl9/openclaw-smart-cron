@@ -1,4 +1,4 @@
-# openclaw-plugin-smart-scheduler
+# openclaw-plugin-smart-cron
 
 **Run agents only when conditions are met, or execute scheduled tasks without waking an agent.**
 
@@ -82,13 +82,13 @@ not save it as a standalone file inside this plugin repo):
 {
   plugins: {
     load: {
-      paths: ["/path/to/openclaw-plugin-smart-scheduler"]
+      paths: ["/path/to/openclaw-plugin-smart-cron"]
     },
     // Ensure the plugin is allowed in your OpenClaw config if your instance
     // restricts plugin loading.
-    allow: ["smart-scheduler"],
+    allow: ["smart-cron"],
     entries: {
-      "smart-scheduler": {
+      "smart-cron": {
         enabled: true,
         config: {
           rules: [
@@ -174,7 +174,7 @@ real values from your own OpenClaw instance.
 
 - **Concurrency**: each rule has an in-flight guard. If a second invocation
   arrives while the first is still running for that rule, it's logged and
-  returned as `smart-scheduler-busy` — the second turn is swallowed cleanly,
+  returned as `smart-cron-busy` — the second turn is swallowed cleanly,
   no double-execution.
 - **Path expansion**: `~/...` is expanded to the user's home directory.
   Relative paths are resolved against the plugin's `rootDir` (provided by
@@ -185,7 +185,7 @@ real values from your own OpenClaw instance.
   empty `match` blocks, and `failOpen + mode: task` combos are warned about
   in the log (not fatal).
 - **Logging**: each handled run emits a structured line of the form
-  `smart-scheduler rule=<idx> trigger=<...> agent=<...> mode=<...> exit=<n> durationMs=<ms> <verdict>`.
+  `smart-cron rule=<idx> trigger=<...> agent=<...> mode=<...> exit=<n> durationMs=<ms> <verdict>`.
 
 ## Local development
 
@@ -200,15 +200,15 @@ no OpenClaw harness is needed for unit tests.
 ## Verifying against a live OpenClaw
 
 ```bash
-openclaw plugins install --link /path/to/openclaw-plugin-smart-scheduler
+openclaw plugins install --link /path/to/openclaw-plugin-smart-cron
 openclaw plugins doctor
-openclaw plugins list | grep smart-scheduler   # should show "loaded"
+openclaw plugins list | grep smart-cron   # should show "loaded"
 ```
 
 Then add the plugin's entry to `~/.openclaw/openclaw.json` (`plugins.allow`,
-`plugins.load.paths`, and `plugins.entries["smart-scheduler"]`) and trigger one
+`plugins.load.paths`, and `plugins.entries["smart-cron"]`) and trigger one
 of the matching cron or heartbeat runs using your normal OpenClaw scheduler or
-control surface. Then inspect the cron log for `smart-scheduler` lines:
+control surface. Then inspect the cron log for `smart-cron` lines:
 
 ```bash
 tail ~/.openclaw/logs/cron/cron.log

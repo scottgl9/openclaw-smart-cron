@@ -2,7 +2,7 @@
 
 ## 0.1.0 — Unreleased
 
-- Initial public scaffold of `smart-scheduler` plugin.
+- Initial public scaffold of `smart-cron` plugin.
 - `before_agent_reply` claiming hook for `cron` and `heartbeat` triggers.
 - Two modes:
   - `gate`: run a check script first; continue to the agent on exit `0`,

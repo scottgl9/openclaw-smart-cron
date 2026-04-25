@@ -17,8 +17,8 @@ function bindHost(api: OpenClawPluginApi): HostBindings {
 export { createBeforeAgentReplyHandler };
 
 export default definePluginEntry({
-  id: "smart-scheduler",
-  name: "Smart Scheduler",
+  id: "smart-cron",
+  name: "Smart Cron",
   description: "Run agents only when conditions are met, or execute scheduled tasks without waking an agent.",
   register(api) {
     const host = bindHost(api);

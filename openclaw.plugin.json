@@ -1,8 +1,9 @@
 {
-  "id": "smart-scheduler",
-  "name": "Smart Scheduler",
+  "id": "smart-cron",
+  "name": "Smart Cron",
   "description": "Run agents only when conditions are met, or execute scheduled tasks without waking an agent.",
   "version": "0.1.0",
+  "skills": ["./skills"],
   "configSchema": {
     "type": "object",
     "additionalProperties": false,

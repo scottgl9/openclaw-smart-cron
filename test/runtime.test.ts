@@ -47,7 +47,7 @@ let pendingDirs: string[] = [];
 
 async function ensureScratch(): Promise<string> {
   if (!scratchDir) {
-    scratchDir = await mkdtemp(join(tmpdir(), "smart-scheduler-test-"));
+    scratchDir = await mkdtemp(join(tmpdir(), "smart-cron-test-"));
     pendingDirs.push(scratchDir);
   }
   return scratchDir;
@@ -107,7 +107,7 @@ test("gate mode returns handled skip on exit 10", async () => {
   });
   const handler = createBeforeAgentReplyHandler(host);
   const result = await handler({ cleanedBody: "x" }, { trigger: "heartbeat" });
-  assert.deepEqual(result, { handled: true, reason: "smart-scheduler-skip" });
+  assert.deepEqual(result, { handled: true, reason: "smart-cron-skip" });
 });
 
 test("gate mode continues on exit 0", async () => {
@@ -127,7 +127,7 @@ test("gate mode swallows errors by default", async () => {
   });
   const handler = createBeforeAgentReplyHandler(host);
   const result = await handler({ cleanedBody: "x" }, { trigger: "cron" });
-  assert.deepEqual(result, { handled: true, reason: "smart-scheduler-error" });
+  assert.deepEqual(result, { handled: true, reason: "smart-cron-error" });
 });
 
 test("gate mode continues on errors when failOpen=true", async () => {
@@ -147,7 +147,7 @@ test("task mode handles success without waking agent", async () => {
   });
   const handler = createBeforeAgentReplyHandler(host);
   const result = await handler({ cleanedBody: "x" }, { trigger: "cron" });
-  assert.deepEqual(result, { handled: true, reason: "smart-scheduler-task-complete" });
+  assert.deepEqual(result, { handled: true, reason: "smart-cron-task-complete" });
 });
 
 test("task mode handles skip exit", async () => {
@@ -157,7 +157,7 @@ test("task mode handles skip exit", async () => {
   });
   const handler = createBeforeAgentReplyHandler(host);
   const result = await handler({ cleanedBody: "x" }, { trigger: "heartbeat" });
-  assert.deepEqual(result, { handled: true, reason: "smart-scheduler-task-skip" });
+  assert.deepEqual(result, { handled: true, reason: "smart-cron-task-skip" });
 });
 
 test("task mode swallows failures by default", async () => {
@@ -167,7 +167,7 @@ test("task mode swallows failures by default", async () => {
   });
   const handler = createBeforeAgentReplyHandler(host);
   const result = await handler({ cleanedBody: "x" }, { trigger: "cron" });
-  assert.deepEqual(result, { handled: true, reason: "smart-scheduler-task-error" });
+  assert.deepEqual(result, { handled: true, reason: "smart-cron-task-error" });
 });
 
 test("task mode marks ignored when failOpen=true", async () => {
@@ -177,7 +177,7 @@ test("task mode marks ignored when failOpen=true", async () => {
   });
   const handler = createBeforeAgentReplyHandler(host);
   const result = await handler({ cleanedBody: "x" }, { trigger: "cron" });
-  assert.deepEqual(result, { handled: true, reason: "smart-scheduler-task-error-ignored" });
+  assert.deepEqual(result, { handled: true, reason: "smart-cron-task-error-ignored" });
 });
 
 test("reads from pluginConfig (regression: was reading api.config)", async () => {
@@ -224,7 +224,7 @@ test("passes args, cwd, and env to the script", async () => {
   };
   const handler = createBeforeAgentReplyHandler(host);
   const result = await handler({ cleanedBody: "x" }, { trigger: "cron" });
-  assert.deepEqual(result, { handled: true, reason: "smart-scheduler-skip" });
+  assert.deepEqual(result, { handled: true, reason: "smart-cron-skip" });
   const stderrLine = capture.info.find((m) => m.includes("stderr="));
   assert.ok(stderrLine, "expected logOutput info line");
   assert.match(stderrLine!, /hello\|from-rule\|/);
@@ -241,7 +241,7 @@ test("concurrency guard returns busy on overlap", async () => {
   // schedule second call shortly after, while first is still running
   await new Promise((r) => setTimeout(r, 30));
   const b = await handler({ cleanedBody: "x" }, { trigger: "cron" });
-  assert.deepEqual(b, { handled: true, reason: "smart-scheduler-busy" });
+  assert.deepEqual(b, { handled: true, reason: "smart-cron-busy" });
   assert.equal(await a, undefined);
 });
 
