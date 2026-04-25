@@ -27,7 +27,9 @@ register time.
 The check script's exit code drives the decision:
 
 - exit `0` → continue to the agent (work found).
-- exit `10` (or any code in `skipExitCodes`) → swallow this run (no work).
+- exit `10` by default → swallow this run (no work).
+- `skipExitCodes` lets you change or extend the skip codes; by default it is
+  `[10]`.
 - any other non-zero → swallow by default. Set `failOpen: true` to continue
   anyway (run the agent on script error).
 
@@ -36,7 +38,9 @@ The check script's exit code drives the decision:
 Always claims the turn — the agent is never invoked. The script is the work.
 
 - exit `0` → logged as task success.
-- exit `10` (or `skipExitCodes`) → logged as task skip.
+- exit `10` by default → logged as task skip.
+- `skipExitCodes` lets you change or extend the skip codes; by default it is
+  `[10]`.
 - non-zero → logged as task failure (or task-error-ignored if `failOpen: true`).
 
 In both modes the OpenClaw cron entry must still exist — it's what fires the
@@ -70,6 +74,10 @@ Rules are evaluated **first-match-wins**.
 
 ## Config example
 
+Add the following example to your main OpenClaw config file at
+`~/.openclaw/openclaw.json` (merge it into the existing top-level object; do
+not save it as a standalone file inside this plugin repo):
+
 ```json5
 {
   plugins: {
@@ -84,34 +92,53 @@ Rules are evaluated **first-match-wins**.
         enabled: true,
         config: {
           rules: [
-            // Gate: only wake the email agent if there's mail.
+            // Recommended pattern for native OpenClaw cron jobs:
+            // match a specific cron job by runId so the gate applies only to
+            // that one scheduled workflow.
             {
               mode: "gate",
-              match: { trigger: "cron", agentId: "sentinel-work" },
-              file: "/home/me/scripts/check-email.sh",
-              timeoutSeconds: 30,
+              match: {
+                trigger: "cron",
+                runId: "11111111-2222-3333-4444-555555555555"
+              },
+              file: "~/scripts/pr-check.sh",
+              timeoutSeconds: 180,
               skipExitCodes: [10],
               logOutput: true
             },
 
-            // Task: nightly archive script, never wakes a model.
-            // "scheduled-tasks" is just an example agentId placeholder.
+            // Another cron gate, also matched by runId.
             {
-              mode: "task",
-              match: { trigger: "cron", agentId: "scheduled-tasks" },
-              file: "/home/me/scripts/nightly-archive.sh",
-              env: { ARCHIVE_DEST: "/var/backups/archive" },
-              cwd: "/home/me",
-              timeoutSeconds: 300,
+              mode: "gate",
+              match: {
+                trigger: "cron",
+                runId: "66666666-7777-8888-9999-000000000000"
+              },
+              file: "~/scripts/jira-check.sh",
+              timeoutSeconds: 180,
+              skipExitCodes: [10],
               logOutput: true
             },
 
-            // Gate: heartbeat only when an inbox file changed.
+            // Heartbeat gating can still match on agentId when that is the
+            // clearest stable selector for the workflow.
             {
               mode: "gate",
               match: { trigger: "heartbeat", agentId: "sentinel-personal" },
-              file: "/home/me/scripts/has-changes.sh",
+              file: "~/scripts/email-check.sh",
               failOpen: false
+            },
+
+            // Task mode example: run a script as the entire job without ever
+            // invoking the agent/model.
+            {
+              mode: "task",
+              match: { trigger: "cron", agentId: "scheduled-tasks" },
+              file: "~/scripts/nightly-archive.sh",
+              env: { ARCHIVE_DEST: "~/archives/nightly" },
+              cwd: "~/scripts",
+              timeoutSeconds: 300,
+              logOutput: true
             }
           ]
         }
@@ -121,6 +148,11 @@ Rules are evaluated **first-match-wins**.
 }
 ```
 
+For native OpenClaw cron jobs, `runId` is often the best matcher because it
+pins the rule to one exact scheduled job, even if multiple jobs target the same
+agent.
+
+
 All paths and agent IDs above are illustrative placeholders; replace them with
 real values from your own OpenClaw instance.
 
@@ -128,7 +160,9 @@ real values from your own OpenClaw instance.
 ## Conventions for check scripts
 
 - **Exit `0`** → work found, run the agent.
-- **Exit `10`** → no work, skip cleanly.
+- **Exit `10`** → no work, skip cleanly (default skip code).
+- **`skipExitCodes`** → change or extend the skip codes if you want to use a
+  different convention; default is `[10]`.
 - **Exit anything else** → unexpected error. Plugin swallows the turn unless
   `failOpen: true`.
 - Keep checks fast. The hook runs inline before the agent — long checks delay
