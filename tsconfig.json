@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noEmit": true,
+    "allowJs": false,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "openclaw/plugin-sdk/plugin-entry": ["../openclaw/dist/plugin-sdk/plugin-entry.d.ts"],
+      "openclaw/plugin-sdk/src/plugins/hooks": ["../openclaw/dist/plugin-sdk/src/plugins/hooks.d.ts"]
+    }
+  },
+  "include": ["index.ts"]
+}

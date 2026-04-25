@@ -1,0 +1,18 @@
+{
+  "name": "openclaw-plugin-smart-scheduler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Run agents only when conditions are met, or execute scheduled tasks without waking an agent.",
+  "openclaw": {
+    "extensions": ["./index.ts"]
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.5.0"
+  }
+}

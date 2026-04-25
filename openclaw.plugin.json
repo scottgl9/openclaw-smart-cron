@@ -1,0 +1,71 @@
+{
+  "id": "smart-scheduler",
+  "name": "Smart Scheduler",
+  "description": "Run agents only when conditions are met, or execute scheduled tasks without waking an agent.",
+  "version": "0.1.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "rules": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "match": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "trigger": {
+                  "type": "string",
+                  "enum": ["cron", "heartbeat"]
+                },
+                "agentId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sessionKey": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reasonIncludes": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "file": {
+              "type": "string",
+              "minLength": 1
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 300
+            },
+            "skipExitCodes": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "failOpen": {
+              "type": "boolean"
+            },
+            "logOutput": {
+              "type": "boolean"
+            }
+          },
+          "required": ["file"]
+        }
+      }
+    }
+  }
+}
