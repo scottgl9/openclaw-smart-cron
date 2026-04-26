@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.3
+
+- Use unscoped package name `smartcron` for ClawHub (`openclaw plugins install clawhub:smartcron`).
+
 ## 0.9.2
 
 - Renamed package to `smartcron` for ClawHub publication (`openclaw plugins install clawhub:smartcron`).
