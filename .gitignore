@@ -18,6 +18,7 @@ npm-debug.log*
 # Test/runtime scratch
 .tmp/
 coverage/
+*.tgz
 
 # Env / secrets
 .env
