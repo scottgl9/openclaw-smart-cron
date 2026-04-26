@@ -1,6 +1,6 @@
 {
   "name": "openclaw-plugin-smart-cron",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Gate scheduled OpenClaw runs or execute cron-driven tasks without waking the model.",
   "license": "MIT",
   "author": "Scott Glover <scottgl@gmail.com>",
@@ -16,6 +16,7 @@
   "files": [
     "index.ts",
     "src",
+    "dist",
     "types",
     "skills",
     "README.md",
@@ -25,6 +26,9 @@
   "openclaw": {
     "extensions": [
       "./index.ts"
+    ],
+    "runtimeExtensions": [
+      "./dist/index.js"
     ],
     "compat": {
       "pluginApi": ">=2026.4.20",
@@ -36,8 +40,10 @@
     }
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "prepack": "npm run build"
   },
   "keywords": [
     "openclaw",

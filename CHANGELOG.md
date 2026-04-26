@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.1
+
+- Added a build output and `openclaw.runtimeExtensions` for cleaner ClawHub/npm publication.
+- Included built runtime artifacts in the publish tarball and automated builds through `prepack`.
+
 ## 0.9.0
 
 - Added `jobId` matcher support for cron-targeted rules, aligned with merged OpenClaw PR #71827.

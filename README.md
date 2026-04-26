@@ -39,6 +39,7 @@ for the design rationale behind this plugin approach.
 - **Concurrency-safe** with an in-flight guard per rule
 - **Publishable plugin shape** with bundled skill support
 - **Lightweight local development** with pure runtime unit tests
+- **Built runtime artifact** for cleaner ClawHub/npm distribution
 
 ## Status
 
@@ -310,11 +311,15 @@ If you plan to publish this plugin on ClawHub:
 
 ```bash
 npm install
+npm run build
 npm test
 ```
 
 Tests run against the pure runtime in `src/runtime.ts` via the `tsx` loader —
 no OpenClaw harness is needed for unit tests.
+
+For publishing, the package also emits built JavaScript to `dist/` and advertises
+`openclaw.runtimeExtensions` so ClawHub/npm installs do not need runtime TypeScript compilation.
 
 ## Verifying against a live OpenClaw
 
@@ -340,6 +345,8 @@ tail ~/.openclaw/logs/cron/cron.log
   4 KiB when logged.
 - The plugin uses public OpenClaw SDK subpath imports only
   (`openclaw/plugin-sdk/plugin-entry`).
+- Published packages ship `dist/index.js` and advertise it through
+  `openclaw.runtimeExtensions` for cleaner install/runtime behavior.
 - `jobId` matching requires an OpenClaw version that includes merged PR
   [#71827](https://github.com/openclaw/openclaw/pull/71827). Until you upgrade
   to a build containing that change, keep using `runId`/other matchers in live
