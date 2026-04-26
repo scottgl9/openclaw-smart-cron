@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.2
+
+- Renamed package to `@scottgl9/smartcron` for ClawHub publication.
+
 ## 0.9.1
 
 - Added a build output and `openclaw.runtimeExtensions` for cleaner ClawHub/npm publication.

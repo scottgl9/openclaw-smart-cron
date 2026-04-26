@@ -2,7 +2,7 @@
   "id": "smartcron",
   "name": "Smartcron",
   "description": "Gate scheduled OpenClaw runs or execute cron-driven tasks without waking the model.",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "skills": ["./skills"],
   "homepage": "https://github.com/scottgl9/openclaw-smartcron",
   "repository": "https://github.com/scottgl9/openclaw-smartcron",

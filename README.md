@@ -1,8 +1,8 @@
-# Smartcron for OpenClaw
+# Smart Cron for OpenClaw
 
 **Run scheduled workflows only when conditions are met — or execute cron-driven tasks without waking the model.**
 
-Smartcron is an OpenClaw plugin for **gating** scheduled runs and **executing script-only jobs** through OpenClaw's scheduler.
+Smart Cron is an OpenClaw plugin for **gating** scheduled runs and **executing script-only jobs** through OpenClaw's scheduler.
 It attaches to OpenClaw's `before_agent_reply` claiming hook and decides, per run, whether to:
 
 - **Gate (`mode: "gate"`)** — run a check script first; continue to the agent only when real work exists.
@@ -12,11 +12,11 @@ This is useful when you want OpenClaw cron jobs to behave more like production a
 
 [OpenClaw](https://github.com/openclaw/openclaw) · [Docs](https://docs.openclaw.ai) · [Cron jobs](https://docs.openclaw.ai/automation/cron-jobs) · [Skills](https://docs.openclaw.ai/tools/skills) · [ClawHub](https://clawhub.ai)
 
-> Smartcron is ideal for PR checks, inbox triage, Jira polling, watchdog workflows, and any scheduled automation that should stay quiet when there is no real work.
+> Smart Cron is ideal for PR checks, inbox triage, Jira polling, watchdog workflows, and any scheduled automation that should stay quiet when there is no real work.
 
-## Why Smartcron?
+## Why Smart Cron?
 
-Native OpenClaw cron jobs are great at scheduling. Smartcron adds a thin decision layer before the model runs.
+Native OpenClaw cron jobs are great at scheduling. Smart Cron adds a thin decision layer before the model runs.
 
 Use it when you want to:
 
@@ -70,8 +70,18 @@ Working and test-covered. The current plugin supports:
 
 ### 1) Install or link the plugin
 
+From ClawHub:
+
 ```bash
-openclaw plugins install --link /path/to/openclaw-plugin-smartcron
+openclaw plugins install @scottgl9/smartcron
+openclaw plugins doctor
+openclaw plugins list | grep smartcron
+```
+
+Or link a local checkout:
+
+```bash
+openclaw plugins install --link /path/to/smartcron
 openclaw plugins doctor
 openclaw plugins list | grep smartcron
 ```
@@ -157,7 +167,7 @@ not save it as a standalone file inside this plugin repo):
 {
   plugins: {
     load: {
-      paths: ["/path/to/openclaw-plugin-smartcron"]
+      paths: ["/path/to/smartcron"]
     },
     // Ensure the plugin is allowed in your OpenClaw config if your instance
     // restricts plugin loading.
@@ -324,7 +334,9 @@ For publishing, the package also emits built JavaScript to `dist/` and advertise
 ## Verifying against a live OpenClaw
 
 ```bash
-openclaw plugins install --link /path/to/openclaw-plugin-smartcron
+openclaw plugins install @scottgl9/smartcron
+# or for a local checkout:
+openclaw plugins install --link /path/to/smartcron
 openclaw plugins doctor
 openclaw plugins list | grep smartcron   # should show "loaded"
 ```
