@@ -21,7 +21,7 @@ Prefer native OpenClaw cron jobs as the scheduler and use Smart Cron only for th
 Recommended pattern:
 
 1. Keep the real OpenClaw cron job.
-2. Match the Smart Cron rule by `runId` when targeting one exact cron workflow.
+2. Match the Smart Cron rule by `jobId` when targeting one exact cron workflow (once the OpenClaw instance has upgraded to a build that includes merged PR #71827).
 3. Use `mode: "gate"` when the downstream agent prompt should run only if real work exists.
 4. Use `mode: "task"` only when the script itself is the whole job and no agent/model wake is needed.
 5. If the gate script performs an expensive fetch that the downstream agent also needs, write a handoff artifact (for example in `/tmp`) so the prompt can reuse it instead of repeating the fetch.
@@ -56,8 +56,9 @@ Supported match keys:
 - `sessionKey`
 - `channelId`
 - `runId`
+- `jobId`
 
-Prefer `runId` for native cron workflows because it pins the rule to one exact scheduled job, even when several jobs target the same agent.
+Prefer `jobId` for native cron workflows because it pins the rule to one exact scheduled job, even when several jobs target the same agent. Use `runId` only when you intentionally want to target one execution instance or until your OpenClaw instance has upgraded to a build that includes merged PR #71827.
 
 ## Configuration guidance
 
@@ -77,7 +78,7 @@ Example shape:
               mode: "gate",
               match: {
                 trigger: "cron",
-                runId: "11111111-2222-3333-4444-555555555555"
+                jobId: "11111111-2222-3333-4444-555555555555"
               },
               file: "~/scripts/check-prs.sh",
               timeoutSeconds: 180,

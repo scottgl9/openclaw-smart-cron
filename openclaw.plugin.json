@@ -1,9 +1,11 @@
 {
   "id": "smart-cron",
   "name": "Smart Cron",
-  "description": "Run agents only when conditions are met, or execute scheduled tasks without waking an agent.",
-  "version": "0.1.0",
+  "description": "Gate scheduled OpenClaw runs or execute cron-driven tasks without waking the model.",
+  "version": "0.9.0",
   "skills": ["./skills"],
+  "homepage": "https://github.com/scottgl9/openclaw-smart-cron",
+  "repository": "https://github.com/scottgl9/openclaw-smart-cron",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
@@ -35,6 +37,10 @@
                   "minLength": 1
                 },
                 "runId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "jobId": {
                   "type": "string",
                   "minLength": 1
                 }

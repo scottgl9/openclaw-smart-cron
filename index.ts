@@ -19,7 +19,7 @@ export { createBeforeAgentReplyHandler };
 export default definePluginEntry({
   id: "smart-cron",
   name: "Smart Cron",
-  description: "Run agents only when conditions are met, or execute scheduled tasks without waking an agent.",
+  description: "Gate scheduled OpenClaw runs or execute cron-driven tasks without waking the model.",
   register(api) {
     const host = bindHost(api);
     void validateRules(host);

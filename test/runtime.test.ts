@@ -82,20 +82,24 @@ test("declines when no rule matches", async () => {
   assert.equal(result, undefined);
 });
 
-test("matches by channelId and runId", async () => {
+test("matches by channelId, runId, and jobId", async () => {
   const trueScript = await writeScript("true2.sh", "#!/bin/sh\nexit 0\n");
   const host = makeHost({
     rules: [
-      { match: { trigger: "cron", channelId: "ch1", runId: "r1" }, file: trueScript },
+      { match: { trigger: "cron", channelId: "ch1", runId: "r1", jobId: "j1" }, file: trueScript },
     ],
   });
   const handler = createBeforeAgentReplyHandler(host);
   assert.equal(
-    await handler({ cleanedBody: "x" }, { trigger: "cron", channelId: "ch1", runId: "r1" }),
+    await handler({ cleanedBody: "x" }, { trigger: "cron", channelId: "ch1", runId: "r1", jobId: "j1" }),
     undefined,
   );
   assert.deepEqual(
-    await handler({ cleanedBody: "x" }, { trigger: "cron", channelId: "ch2", runId: "r1" }),
+    await handler({ cleanedBody: "x" }, { trigger: "cron", channelId: "ch2", runId: "r1", jobId: "j1" }),
+    undefined,
+  );
+  assert.deepEqual(
+    await handler({ cleanedBody: "x" }, { trigger: "cron", channelId: "ch1", runId: "r1", jobId: "j2" }),
     undefined,
   );
 });

@@ -19,6 +19,7 @@ export type MatchRule = {
   sessionKey?: string;
   channelId?: string;
   runId?: string;
+  jobId?: string;
 };
 
 export type Rule = {
@@ -44,6 +45,7 @@ export type HookContext = {
   sessionKey?: string;
   channelId?: string;
   runId?: string;
+  jobId?: string;
 };
 
 export type HookEvent = {
@@ -126,6 +128,7 @@ function matchesRule(rule: Rule, ctx: HookContext): boolean {
   if (match.sessionKey && ctx.sessionKey !== match.sessionKey) return false;
   if (match.channelId && ctx.channelId !== match.channelId) return false;
   if (match.runId && ctx.runId !== match.runId) return false;
+  if (match.jobId && ctx.jobId !== match.jobId) return false;
   return true;
 }
 
@@ -171,6 +174,7 @@ function buildPrefix(
 ): string {
   const parts = [`smart-cron`, `rule=${ruleIdx}`, `trigger=${ctx.trigger}`];
   if (ctx.agentId) parts.push(`agent=${ctx.agentId}`);
+  if (ctx.jobId) parts.push(`job=${ctx.jobId}`);
   parts.push(`mode=${mode}`);
   parts.push(`exit=${exitCode ?? "null"}`);
   parts.push(`durationMs=${durationMs}`);

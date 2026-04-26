@@ -12,6 +12,7 @@ declare module "openclaw/plugin-sdk/plugin-entry" {
 
   export type PluginHookAgentContext = {
     runId?: string;
+    jobId?: string;
     agentId?: string;
     sessionKey?: string;
     sessionId?: string;

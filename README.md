@@ -1,24 +1,97 @@
-# openclaw-plugin-smart-cron
+# Smart Cron for OpenClaw
 
-**Run agents only when conditions are met, or execute scheduled tasks without waking an agent.**
+**Run scheduled workflows only when conditions are met — or execute cron-driven tasks without waking the model.**
 
-This plugin attaches to OpenClaw's `before_agent_reply` claiming hook and decides
-— per scheduled run — whether to:
+Smart Cron is an OpenClaw plugin for **gating** scheduled runs and **executing script-only jobs** through OpenClaw's scheduler.
+It attaches to OpenClaw's `before_agent_reply` claiming hook and decides, per run, whether to:
 
-- **Gate (`mode: "gate"`)**: run a check script first; let the agent run if work
-  is found, otherwise swallow the turn before the model is invoked.
-- **Task (`mode: "task"`)**: run the script and unconditionally claim the turn.
-  The model is never invoked. Use this to drive plain cron-style automation
-  through OpenClaw's scheduler without any LLM cost.
+- **Gate (`mode: "gate"`)** — run a check script first; continue to the agent only when real work exists.
+- **Task (`mode: "task"`)** — run the script as the job itself and always claim the turn, so the model never runs.
+
+This is useful when you want OpenClaw cron jobs to behave more like production automation: **cheap when idle, selective when work exists, and script-first when no LLM is needed**.
+
+[OpenClaw](https://github.com/openclaw/openclaw) · [Docs](https://docs.openclaw.ai) · [Cron jobs](https://docs.openclaw.ai/automation/cron-jobs) · [Skills](https://docs.openclaw.ai/tools/skills) · [ClawHub](https://clawhub.ai)
+
+> Smart Cron is ideal for PR checks, inbox triage, Jira polling, watchdog workflows, and any scheduled automation that should stay quiet when there is no real work.
+
+## Why Smart Cron?
+
+Native OpenClaw cron jobs are great at scheduling. Smart Cron adds a thin decision layer before the model runs.
+
+Use it when you want to:
+
+- skip scheduled runs cleanly when there is no work
+- run shell scripts on a schedule without any model cost
+- gate expensive PR, Jira, inbox, or monitoring workflows
+- avoid duplicate fetches by handing artifacts from a gate script to the downstream prompt
+- keep scheduling in OpenClaw while moving decision logic into small, testable scripts
 
 The hook fires on both `cron`-triggered and `heartbeat`-triggered runs. See
 [OpenClaw issue #49339](https://github.com/openclaw/openclaw/issues/49339#issuecomment-4318029106)
-for the design rationale (this plugin is the recommended user-space implementation).
+for the design rationale behind this plugin approach.
+
+## Highlights
+
+- **Two modes**: `gate` and `task`
+- **First-match-wins rules** for precise workflow targeting
+- **Cron and heartbeat triggers**
+- **Per-rule args, env, cwd, timeouts, and skip exit codes**
+- **Concurrency-safe** with an in-flight guard per rule
+- **Publishable plugin shape** with bundled skill support
+- **Lightweight local development** with pure runtime unit tests
 
 ## Status
 
-Working. Covers both gate and task modes, concurrency-safe, validates rules at
-register time.
+Working and test-covered. The current plugin supports:
+
+- gate mode
+- task mode
+- rule validation at register time
+- structured logging
+- `~/` expansion and host path resolution
+- `jobId` matching support for newer OpenClaw builds
+
+## At a glance
+
+| Capability | Supported |
+| --- | --- |
+| `cron` trigger | Yes |
+| `heartbeat` trigger | Yes |
+| Gate mode | Yes |
+| Task mode | Yes |
+| Rule matching by `agentId` / `channelId` / `sessionKey` | Yes |
+| Rule matching by `runId` | Yes |
+| Rule matching by `jobId` | Yes, on newer OpenClaw builds |
+| Bundled skill | Yes |
+| Unit tests | Yes |
+
+## Quick start
+
+### 1) Install or link the plugin
+
+```bash
+openclaw plugins install --link /path/to/openclaw-plugin-smart-cron
+openclaw plugins doctor
+openclaw plugins list | grep smart-cron
+```
+
+### 2) Add it to your OpenClaw config
+
+Add a `smart-cron` entry to `~/.openclaw/openclaw.json` under:
+
+- `plugins.load.paths`
+- `plugins.allow`
+- `plugins.entries["smart-cron"]`
+
+A full example is shown below.
+
+### 3) Trigger a matching cron or heartbeat run
+
+Then inspect logs for `smart-cron` lines:
+
+```bash
+tail ~/.openclaw/logs/cron/cron.log
+```
 
 ## Modes
 
@@ -58,6 +131,7 @@ type Rule = {
     sessionKey?: string;
     channelId?: string;
     runId?: string;
+    jobId?: string;
   };
   file: string;                         // absolute path; ~ is expanded
   args?: string[];
@@ -72,7 +146,7 @@ type Rule = {
 
 Rules are evaluated **first-match-wins**.
 
-## Config example
+## Configuration example
 
 Add the following example to your main OpenClaw config file at
 `~/.openclaw/openclaw.json` (merge it into the existing top-level object; do
@@ -93,13 +167,13 @@ not save it as a standalone file inside this plugin repo):
         config: {
           rules: [
             // Recommended pattern for native OpenClaw cron jobs:
-            // match a specific cron job by runId so the gate applies only to
+            // match a specific cron job by jobId so the gate applies only to
             // that one scheduled workflow.
             {
               mode: "gate",
               match: {
                 trigger: "cron",
-                runId: "11111111-2222-3333-4444-555555555555"
+                jobId: "11111111-2222-3333-4444-555555555555"
               },
               file: "~/scripts/pr-check.sh",
               timeoutSeconds: 180,
@@ -107,12 +181,12 @@ not save it as a standalone file inside this plugin repo):
               logOutput: true
             },
 
-            // Another cron gate, also matched by runId.
+            // Another cron gate, also matched by jobId.
             {
               mode: "gate",
               match: {
                 trigger: "cron",
-                runId: "66666666-7777-8888-9999-000000000000"
+                jobId: "66666666-7777-8888-9999-000000000000"
               },
               file: "~/scripts/jira-check.sh",
               timeoutSeconds: 180,
@@ -148,16 +222,32 @@ not save it as a standalone file inside this plugin repo):
 }
 ```
 
-For native OpenClaw cron jobs, `runId` is often the best matcher because it
-pins the rule to one exact scheduled job, even if multiple jobs target the same
-agent.
-
+For native OpenClaw cron jobs, `jobId` is now the best matcher because it pins
+the rule to one exact scheduled job. `runId` is still available, but it refers
+to the individual execution instance rather than the stable cron job identity.
 
 All paths and agent IDs above are illustrative placeholders; replace them with
 real values from your own OpenClaw instance.
 
+## Matching guidance
 
-## Conventions for check scripts
+Supported match keys:
+
+- `trigger`
+- `agentId`
+- `sessionKey`
+- `channelId`
+- `runId`
+- `jobId`
+
+Recommended matching strategy:
+
+- use **`jobId`** for stable native cron-job targeting once your OpenClaw install includes merged PR [#71827](https://github.com/openclaw/openclaw/pull/71827)
+- use **`runId`** only when you intentionally want to target one execution instance or while waiting on that OpenClaw upgrade
+- use **`agentId`** or **`channelId`** when the workflow is broader than a single cron job
+- keep rules specific, because evaluation is **first-match-wins**
+
+## Check script conventions
 
 - **Exit `0`** → work found, run the agent.
 - **Exit `10`** → no work, skip cleanly (default skip code).
@@ -169,6 +259,24 @@ real values from your own OpenClaw instance.
   the model. Default timeout is 30s, max 300s.
 - Write to stderr/stdout; with `logOutput: true` the plugin captures (truncated
   to 4 KiB) into the OpenClaw log.
+
+## Typical use cases
+
+### Gate a PR review workflow
+
+Run a lightweight script first. If no PRs need attention, exit `10` and skip the model entirely.
+
+### Gate Jira or inbox triage
+
+Use a fast polling script to decide whether the downstream agent prompt should run.
+
+### Run script-only scheduled jobs
+
+Use `mode: "task"` when the script itself is the whole job and no LLM wake is needed.
+
+### Share expensive fetches with downstream prompts
+
+If the gate script already fetched useful data, write a handoff artifact (for example under `/tmp`) so the downstream prompt can reuse it.
 
 ## Behavior details
 
@@ -186,6 +294,17 @@ real values from your own OpenClaw instance.
   in the log (not fatal).
 - **Logging**: each handled run emits a structured line of the form
   `smart-cron rule=<idx> trigger=<...> agent=<...> mode=<...> exit=<n> durationMs=<ms> <verdict>`.
+
+## Publishing notes
+
+If you plan to publish this plugin on ClawHub:
+
+- keep `README.md`, `openclaw.plugin.json`, `package.json`, and the bundled skill aligned
+- prefer stable public SDK imports only
+- document any OpenClaw version dependency clearly
+- keep examples realistic, but mark placeholders as placeholders
+- verify install, doctor, and runtime behavior from a clean OpenClaw instance before publishing
+- use a concise plugin description and strong keywords so the listing is discoverable
 
 ## Local development
 
@@ -221,3 +340,7 @@ tail ~/.openclaw/logs/cron/cron.log
   4 KiB when logged.
 - The plugin uses public OpenClaw SDK subpath imports only
   (`openclaw/plugin-sdk/plugin-entry`).
+- `jobId` matching requires an OpenClaw version that includes merged PR
+  [#71827](https://github.com/openclaw/openclaw/pull/71827). Until you upgrade
+  to a build containing that change, keep using `runId`/other matchers in live
+  config.

@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.1.0 — Unreleased
+## 0.9.0
+
+- Added `jobId` matcher support for cron-targeted rules, aligned with merged OpenClaw PR #71827.
+- Updated docs to recommend `jobId` for stable cron job targeting while noting that live use must wait for an OpenClaw version containing that change.
+- Polished README and publication metadata for ClawHub/npm-style distribution.
+- Added author, repository, homepage, bugs, and publish file metadata.
+
+## 0.1.0
 
 - Initial public scaffold of `smart-cron` plugin.
 - `before_agent_reply` claiming hook for `cron` and `heartbeat` triggers.
