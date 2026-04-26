@@ -172,7 +172,7 @@ function buildPrefix(
   durationMs: number,
   exitCode: number | null,
 ): string {
-  const parts = [`smart-cron`, `rule=${ruleIdx}`, `trigger=${ctx.trigger}`];
+  const parts = [`smartcron`, `rule=${ruleIdx}`, `trigger=${ctx.trigger}`];
   if (ctx.agentId) parts.push(`agent=${ctx.agentId}`);
   if (ctx.jobId) parts.push(`job=${ctx.jobId}`);
   parts.push(`mode=${mode}`);
@@ -199,8 +199,8 @@ export function createBeforeAgentReplyHandler(host: HostBindings) {
 
     const existing = inFlight.get(ruleIdx);
     if (existing) {
-      logger.info(`smart-cron rule=${ruleIdx} trigger=${ctx.trigger} mode=${mode} skipped (in flight)`);
-      return { handled: true, reason: "smart-cron-busy" };
+      logger.info(`smartcron rule=${ruleIdx} trigger=${ctx.trigger} mode=${mode} skipped (in flight)`);
+      return { handled: true, reason: "smartcron-busy" };
     }
 
     const work = runRule(rule);
@@ -223,18 +223,18 @@ export function createBeforeAgentReplyHandler(host: HostBindings) {
     if (mode === "task") {
       if (outcome.kind === "continue") {
         logger.info(`${prefix} task completed`);
-        return { handled: true, reason: "smart-cron-task-complete" };
+        return { handled: true, reason: "smartcron-task-complete" };
       }
       if (outcome.kind === "skip") {
         logger.info(`${prefix} task skipped`);
-        return { handled: true, reason: "smart-cron-task-skip" };
+        return { handled: true, reason: "smartcron-task-skip" };
       }
       if (rule.failOpen) {
         logger.warn(`${prefix} task error but failOpen=true; swallowing scheduled turn. ${String(outcome.error)}`);
-        return { handled: true, reason: "smart-cron-task-error-ignored" };
+        return { handled: true, reason: "smartcron-task-error-ignored" };
       }
       logger.error(`${prefix} task failed; swallowing scheduled turn. ${String(outcome.error)}`);
-      return { handled: true, reason: "smart-cron-task-error" };
+      return { handled: true, reason: "smartcron-task-error" };
     }
 
     if (outcome.kind === "continue") {
@@ -243,14 +243,14 @@ export function createBeforeAgentReplyHandler(host: HostBindings) {
     }
     if (outcome.kind === "skip") {
       logger.info(`${prefix} skipped by rule ${rule.file}`);
-      return { handled: true, reason: "smart-cron-skip" };
+      return { handled: true, reason: "smartcron-skip" };
     }
     if (rule.failOpen) {
       logger.warn(`${prefix} gate error but failOpen=true; continuing. ${String(outcome.error)}`);
       return;
     }
     logger.error(`${prefix} gate failed; swallowing run. ${String(outcome.error)}`);
-    return { handled: true, reason: "smart-cron-error" };
+    return { handled: true, reason: "smartcron-error" };
   };
 }
 
@@ -263,15 +263,15 @@ export async function validateRules(host: HostBindings): Promise<void> {
       await access(rule.resolvedFile, fsConstants.X_OK);
     } catch (err) {
       logger.warn(
-        `smart-cron rule=${i}: file not executable or missing: ${rule.resolvedFile} (${String(err)})`,
+        `smartcron rule=${i}: file not executable or missing: ${rule.resolvedFile} (${String(err)})`,
       );
     }
     if (!rule.match || Object.keys(rule.match).length === 0) {
-      logger.warn(`smart-cron rule=${i}: no match criteria; will fire on every cron/heartbeat`);
+      logger.warn(`smartcron rule=${i}: no match criteria; will fire on every cron/heartbeat`);
     }
     if (rule.failOpen && resolveRuleMode(rule) === "task") {
       logger.warn(
-        `smart-cron rule=${i}: failOpen=true with mode=task is unusual (errors are swallowed regardless)`,
+        `smartcron rule=${i}: failOpen=true with mode=task is unusual (errors are swallowed regardless)`,
       );
     }
   }

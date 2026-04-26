@@ -1,13 +1,13 @@
 ---
-name: smart-cron
-description: Use the Smart Cron plugin to gate scheduled OpenClaw runs or execute scheduled tasks without waking the model.
+name: smartcron
+description: Use the Smartcron plugin to gate scheduled OpenClaw runs or execute scheduled tasks without waking the model.
 ---
 
 Use this skill when configuring or reviewing OpenClaw scheduled workflows that should only wake an agent when real work exists, or when a cron-driven job should run a script without invoking the model.
 
 ## What this plugin does
 
-Smart Cron attaches to OpenClaw's `before_agent_reply` hook and evaluates matching rules before the model runs.
+Smartcron attaches to OpenClaw's `before_agent_reply` hook and evaluates matching rules before the model runs.
 
 It supports two modes:
 
@@ -16,12 +16,12 @@ It supports two modes:
 
 ## Recommended usage
 
-Prefer native OpenClaw cron jobs as the scheduler and use Smart Cron only for the decision layer.
+Prefer native OpenClaw cron jobs as the scheduler and use Smartcron only for the decision layer.
 
 Recommended pattern:
 
 1. Keep the real OpenClaw cron job.
-2. Match the Smart Cron rule by `jobId` when targeting one exact cron workflow (once the OpenClaw instance has upgraded to a build that includes merged PR #71827).
+2. Match the Smartcron rule by `jobId` when targeting one exact cron workflow (once the OpenClaw instance has upgraded to a build that includes merged PR #71827).
 3. Use `mode: "gate"` when the downstream agent prompt should run only if real work exists.
 4. Use `mode: "task"` only when the script itself is the whole job and no agent/model wake is needed.
 5. If the gate script performs an expensive fetch that the downstream agent also needs, write a handoff artifact (for example in `/tmp`) so the prompt can reuse it instead of repeating the fetch.
@@ -70,7 +70,7 @@ Example shape:
 {
   plugins: {
     entries: {
-      "smart-cron": {
+      "smartcron": {
         enabled: true,
         config: {
           rules: [
@@ -95,7 +95,7 @@ Example shape:
 
 ## Good migration patterns
 
-Good fit for Smart Cron:
+Good fit for Smartcron:
 
 - wrapper-style cron jobs that only decide whether an agent should wake
 - PR, Jira, inbox, or mention checks that frequently find no work

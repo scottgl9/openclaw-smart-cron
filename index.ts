@@ -17,8 +17,8 @@ function bindHost(api: OpenClawPluginApi): HostBindings {
 export { createBeforeAgentReplyHandler };
 
 export default definePluginEntry({
-  id: "smart-cron",
-  name: "Smart Cron",
+  id: "smartcron",
+  name: "Smartcron",
   description: "Gate scheduled OpenClaw runs or execute cron-driven tasks without waking the model.",
   register(api) {
     const host = bindHost(api);
