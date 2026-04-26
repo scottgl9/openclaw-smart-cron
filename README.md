@@ -73,7 +73,7 @@ Working and test-covered. The current plugin supports:
 From ClawHub:
 
 ```bash
-openclaw plugins install @scottgl9/smartcron
+openclaw plugins install clawhub:smartcron
 openclaw plugins doctor
 openclaw plugins list | grep smartcron
 ```
@@ -334,7 +334,7 @@ For publishing, the package also emits built JavaScript to `dist/` and advertise
 ## Verifying against a live OpenClaw
 
 ```bash
-openclaw plugins install @scottgl9/smartcron
+openclaw plugins install clawhub:smartcron
 # or for a local checkout:
 openclaw plugins install --link /path/to/smartcron
 openclaw plugins doctor

@@ -2,7 +2,7 @@
 
 ## 0.9.2
 
-- Renamed package to `@scottgl9/smartcron` for ClawHub publication.
+- Renamed package to `smartcron` for ClawHub publication (`openclaw plugins install clawhub:smartcron`).
 
 ## 0.9.1
 
