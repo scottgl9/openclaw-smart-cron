@@ -1,8 +1,8 @@
-# Smart Cron for OpenClaw
+# Smartcron for OpenClaw
 
 **Run scheduled workflows only when conditions are met — or execute cron-driven tasks without waking the model.**
 
-Smart Cron is an OpenClaw plugin for **gating** scheduled runs and **executing script-only jobs** through OpenClaw's scheduler.
+Smartcron is an OpenClaw plugin for **gating** scheduled runs and **executing script-only jobs** through OpenClaw's scheduler.
 It attaches to OpenClaw's `before_agent_reply` claiming hook and decides, per run, whether to:
 
 - **Gate (`mode: "gate"`)** — run a check script first; continue to the agent only when real work exists.
@@ -12,11 +12,11 @@ This is useful when you want OpenClaw cron jobs to behave more like production a
 
 [OpenClaw](https://github.com/openclaw/openclaw) · [Docs](https://docs.openclaw.ai) · [Cron jobs](https://docs.openclaw.ai/automation/cron-jobs) · [Skills](https://docs.openclaw.ai/tools/skills) · [ClawHub](https://clawhub.ai)
 
-> Smart Cron is ideal for PR checks, inbox triage, Jira polling, watchdog workflows, and any scheduled automation that should stay quiet when there is no real work.
+> Smartcron is ideal for PR checks, inbox triage, Jira polling, watchdog workflows, and any scheduled automation that should stay quiet when there is no real work.
 
-## Why Smart Cron?
+## Why Smartcron?
 
-Native OpenClaw cron jobs are great at scheduling. Smart Cron adds a thin decision layer before the model runs.
+Native OpenClaw cron jobs are great at scheduling. Smartcron adds a thin decision layer before the model runs.
 
 Use it when you want to:
 
@@ -71,24 +71,24 @@ Working and test-covered. The current plugin supports:
 ### 1) Install or link the plugin
 
 ```bash
-openclaw plugins install --link /path/to/openclaw-plugin-smart-cron
+openclaw plugins install --link /path/to/openclaw-plugin-smartcron
 openclaw plugins doctor
-openclaw plugins list | grep smart-cron
+openclaw plugins list | grep smartcron
 ```
 
 ### 2) Add it to your OpenClaw config
 
-Add a `smart-cron` entry to `~/.openclaw/openclaw.json` under:
+Add a `smartcron` entry to `~/.openclaw/openclaw.json` under:
 
 - `plugins.load.paths`
 - `plugins.allow`
-- `plugins.entries["smart-cron"]`
+- `plugins.entries["smartcron"]`
 
 A full example is shown below.
 
 ### 3) Trigger a matching cron or heartbeat run
 
-Then inspect logs for `smart-cron` lines:
+Then inspect logs for `smartcron` lines:
 
 ```bash
 tail ~/.openclaw/logs/cron/cron.log
@@ -157,13 +157,13 @@ not save it as a standalone file inside this plugin repo):
 {
   plugins: {
     load: {
-      paths: ["/path/to/openclaw-plugin-smart-cron"]
+      paths: ["/path/to/openclaw-plugin-smartcron"]
     },
     // Ensure the plugin is allowed in your OpenClaw config if your instance
     // restricts plugin loading.
-    allow: ["smart-cron"],
+    allow: ["smartcron"],
     entries: {
-      "smart-cron": {
+      "smartcron": {
         enabled: true,
         config: {
           rules: [
@@ -283,7 +283,7 @@ If the gate script already fetched useful data, write a handoff artifact (for ex
 
 - **Concurrency**: each rule has an in-flight guard. If a second invocation
   arrives while the first is still running for that rule, it's logged and
-  returned as `smart-cron-busy` — the second turn is swallowed cleanly,
+  returned as `smartcron-busy` — the second turn is swallowed cleanly,
   no double-execution.
 - **Path expansion**: `~/...` is expanded to the user's home directory.
   Relative paths are resolved against the plugin's `rootDir` (provided by
@@ -294,7 +294,7 @@ If the gate script already fetched useful data, write a handoff artifact (for ex
   empty `match` blocks, and `failOpen + mode: task` combos are warned about
   in the log (not fatal).
 - **Logging**: each handled run emits a structured line of the form
-  `smart-cron rule=<idx> trigger=<...> agent=<...> mode=<...> exit=<n> durationMs=<ms> <verdict>`.
+  `smartcron rule=<idx> trigger=<...> agent=<...> mode=<...> exit=<n> durationMs=<ms> <verdict>`.
 
 ## Publishing notes
 
@@ -324,15 +324,15 @@ For publishing, the package also emits built JavaScript to `dist/` and advertise
 ## Verifying against a live OpenClaw
 
 ```bash
-openclaw plugins install --link /path/to/openclaw-plugin-smart-cron
+openclaw plugins install --link /path/to/openclaw-plugin-smartcron
 openclaw plugins doctor
-openclaw plugins list | grep smart-cron   # should show "loaded"
+openclaw plugins list | grep smartcron   # should show "loaded"
 ```
 
 Then add the plugin's entry to `~/.openclaw/openclaw.json` (`plugins.allow`,
-`plugins.load.paths`, and `plugins.entries["smart-cron"]`) and trigger one
+`plugins.load.paths`, and `plugins.entries["smartcron"]`) and trigger one
 of the matching cron or heartbeat runs using your normal OpenClaw scheduler or
-control surface. Then inspect the cron log for `smart-cron` lines:
+control surface. Then inspect the cron log for `smartcron` lines:
 
 ```bash
 tail ~/.openclaw/logs/cron/cron.log

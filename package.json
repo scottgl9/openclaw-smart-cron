@@ -1,17 +1,17 @@
 {
-  "name": "openclaw-plugin-smart-cron",
+  "name": "openclaw-plugin-smartcron",
   "version": "0.9.1",
   "description": "Gate scheduled OpenClaw runs or execute cron-driven tasks without waking the model.",
   "license": "MIT",
   "author": "Scott Glover <scottgl@gmail.com>",
   "type": "module",
-  "homepage": "https://github.com/scottgl9/openclaw-smart-cron",
+  "homepage": "https://github.com/scottgl9/openclaw-smartcron",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scottgl9/openclaw-smart-cron.git"
+    "url": "git+https://github.com/scottgl9/openclaw-smartcron.git"
   },
   "bugs": {
-    "url": "https://github.com/scottgl9/openclaw-smart-cron/issues"
+    "url": "https://github.com/scottgl9/openclaw-smartcron/issues"
   },
   "files": [
     "index.ts",

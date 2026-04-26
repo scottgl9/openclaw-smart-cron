@@ -1,11 +1,11 @@
 {
-  "id": "smart-cron",
-  "name": "Smart Cron",
+  "id": "smartcron",
+  "name": "Smartcron",
   "description": "Gate scheduled OpenClaw runs or execute cron-driven tasks without waking the model.",
   "version": "0.9.1",
   "skills": ["./skills"],
-  "homepage": "https://github.com/scottgl9/openclaw-smart-cron",
-  "repository": "https://github.com/scottgl9/openclaw-smart-cron",
+  "homepage": "https://github.com/scottgl9/openclaw-smartcron",
+  "repository": "https://github.com/scottgl9/openclaw-smartcron",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
